@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIPANTAU OPD – Monitoring Penilaian Kinerja Perangkat Daerah</title>
+<style>
+:root{
+  --bg:#eef2f9; --card:#fff; --text:#16223b; --muted:#697792; --border:#e0e6f1;
+  --primary:#1d4ed8; --primary-2:#2563eb; --primary-dark:#172a63;
+  --accent:#0891b2; --green:#15803d; --amber:#b45309; --red:#b91c1c; --purple:#6d28d9;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 8px 24px rgba(16,24,40,.07);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+/* ---------- HEADER (sticky dihilangkan) ---------- */
+header{
+  background:linear-gradient(135deg,#172a63 0%,#1d4ed8 55%,#0891b2 100%);
+  color:#fff; padding:22px 26px 20px; box-shadow:0 4px 22px rgba(23,42,99,.28);
+}
+.header-top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo{
+  width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.15);
+  display:grid;place-items:center;font-size:24px;border:1px solid rgba(255,255,255,.28);
+}
+.brand h1{font-size:19px;font-weight:700;letter-spacing:.2px}
+.brand p{font-size:12px;opacity:.85;margin-top:1px}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:.16s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;
+}
+.btn-light{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.btn-light:hover{background:rgba(255,255,255,.28)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-ghost{background:#f1f5fd;color:var(--primary);border:1px solid var(--border)}
+.btn-ghost:hover{background:#e3ebfb}
+.btn-danger{background:#fee2e2;color:var(--red)}
+.btn-danger:hover{background:#fecaca}
+.btn-sm{padding:6px 10px;font-size:12px;border-radius:7px}
+.opd-bar{
+  margin-top:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  border-radius:12px;padding:10px 14px;
+}
+.opd-bar label{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;opacity:.9}
+.opd-bar input{
+  flex:1;min-width:220px;background:rgba(255,255,255,.95);border:none;border-radius:8px;
+  padding:9px 12px;font-size:14px;font-family:inherit;color:var(--text);font-weight:600;
+}
+.opd-bar input:focus{outline:2px solid #93c5fd}
+/* ---------- TABS (sticky dihilangkan) ---------- */
+nav.tabs{
+  display:flex;gap:4px;padding:0 26px;background:#fff;border-bottom:1px solid var(--border);
+  overflow-x:auto;
+}
+nav.tabs button{
+  border:none;background:none;padding:14px 18px;font-size:14px;font-weight:600;color:var(--muted);
+  cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;white-space:nowrap;transition:.15s;
+}
+nav.tabs button:hover{color:var(--primary);background:#f8fafd}
+nav.tabs button.active{color:var(--primary);border-bottom-color:var(--primary)}
+main{padding:24px 26px 60px;max-width:1500px;margin:0 auto}
+.view{display:none}
+.view.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ---------- CARDS ---------- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:18px 20px}
+.section-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--primary-dark)}
+.section-title .dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+/* ---------- KPI ---------- */
+.kpi{padding:18px 20px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#eff4ff,#e0ecff);opacity:.7}
+.kpi .lbl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;position:relative;z-index:1}
+.kpi .val{font-size:34px;font-weight:800;margin-top:6px;letter-spacing:-1px;position:relative;z-index:1}
+.kpi .sub{font-size:12px;color:var(--muted);margin-top:4px;position:relative;z-index:1}
+.kpi .val small{font-size:15px;font-weight:600;color:var(--muted)}
+.pred-AA{color:#15803d}.pred-A{color:#16a34a}.pred-BB{color:#0891b2}.pred-B{color:#b45309}.pred-C{color:#b91c1c}
+/* ---------- PROGRESS ---------- */
+.bar{height:9px;border-radius:99px;background:#eaf0fb;overflow:hidden}
+.bar>span{display:block;height:100%;border-radius:99px;transition:width .4s ease;background:linear-gradient(90deg,var(--primary-2),var(--accent))}
+.bar.g>span{background:linear-gradient(90deg,#22c55e,#15803d)}
+.bar.a>span{background:linear-gradient(90deg,#fbbf24,#b45309)}
+.bar.r>span{background:linear-gradient(90deg,#f87171,#b91c1c)}
+/* ---------- TW CARD ---------- */
+.twcard{padding:16px 18px}
+.twhead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:10px}
+.twhead h3{font-size:16px;font-weight:800;letter-spacing:-.2px}
+.twhead .pct{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.twmeta{font-size:11.5px;color:var(--muted);margin-top:3px}
+.dual-scores{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;padding:14px 14px;background:linear-gradient(135deg,#f7faff,#fbfdff);border:1px solid #e8eefb;border-radius:12px}
+.dual-scores .sd{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dual-scores .sd-lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.dual-scores .sd-lbl i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dual-scores .sd-v{font-size:38px;font-weight:800;letter-spacing:-1.6px;line-height:1}
+.dual-scores .sd-v small{font-size:17px;font-weight:700;color:var(--muted);letter-spacing:0;margin-left:1px}
+.dual-scores .sd-sub{font-size:11px;color:var(--muted);font-weight:600}
+.sd-detail-btn{
+  margin-top:2px;border:none;background:none;padding:0;
+  font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  display:inline-flex;align-items:center;gap:4px;transition:.15s;
+  text-decoration:underline;text-underline-offset:3px;align-self:flex-start;
+}
+.sd-detail-btn.v{color:var(--primary)}
+.sd-detail-btn.v:hover{color:var(--primary-dark)}
+.sd-detail-btn.m{color:var(--amber)}
+.sd-detail-btn.m:hover{color:#92400e}
+.crit-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed #eef2f9;font-size:13px}
+.crit-row:last-child{border-bottom:none}
+.crit-row .nm{flex:0 0 108px;color:var(--muted);font-weight:600;font-size:12px}
+.crit-row .bar{flex:1}
+.crit-row .vl{flex:0 0 150px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--muted)}
+.crit-row .vl b.v{color:var(--primary-2)}
+.crit-row .vl b.m{color:var(--amber)}
+/* ---------- CHECKLIST ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.filters select,.filters input{
+  padding:9px 12px;border:1px solid var(--border);border-radius:9px;font-size:13px;
+  font-family:inherit;background:#fff;color:var(--text);min-width:150px;
+}
+.filters input{flex:1;min-width:200px}
+.filters select:focus,.filters input:focus{outline:2px solid #bfdbfe;border-color:var(--primary-2)}
+.crit-block{margin-bottom:18px;overflow:hidden}
+.crit-head{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:14px 18px;background:linear-gradient(90deg,#f7faff,#fff);
+  border-bottom:1px solid var(--border);cursor:pointer;user-select:none;
+}
+.crit-head:hover{background:#f2f7ff}
+.crit-head h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.crit-head .chev{transition:.2s;color:var(--muted);font-size:12px}
+.crit-head.collapsed .chev{transform:rotate(-90deg)}
+.crit-body{display:block}
+.crit-body.hidden{display:none}
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;
+  background:#eaf0fb;color:var(--primary);letter-spacing:.2px;
+}
+.badge.green{background:#dcfce7;color:#15803d}
+.badge.amber{background:#fef3c7;color:#b45309}
+.badge.gray{background:#f1f5f9;color:var(--muted)}
+.badge.purple{background:#ede9fe;color:#6d28d9}
+.badge.blue-soft{background:#dbeafe;color:#1d4ed8}
+/* item dengan 2 kolom skor */
+.item{padding:14px 18px;border-bottom:1px solid #f1f5fb;display:grid;grid-template-columns:1fr 240px 240px;gap:14px;align-items:start}
+.item:last-child{border-bottom:none}
+.item:hover{background:#fbfdff}
+.item .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.item .name{font-size:13.5px;font-weight:600;line-height:1.45}
+.score-col label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:5px}
+.score-col.verified label{color:#1d4ed8}
+.score-col.self label{color:#b45309}
+.item select{
+  width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:12.5px;
+  font-family:inherit;background:#fff;color:var(--text);cursor:pointer;line-height:1.4;
+}
+.item select:focus{outline:2px solid #bfdbfe;border-color:var(--primary-2)}
+.item select.filled{border-color:#86efac;background:#f0fdf4;font-weight:600}
+.item select.filled.self-filled{border-color:#fcd34d;background:#fffbeb}
+.item .num{
+  width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:14px;
+  font-family:inherit;font-weight:700;text-align:center;
+}
+.item .num:focus{outline:2px solid #bfdbfe;border-color:var(--primary-2)}
+.item .cur{font-size:11px;color:var(--muted);margin-top:5px;text-align:right}
+.item .cur b.v{color:var(--primary-2);font-size:12.5px}
+.item .cur b.m{color:var(--amber);font-size:12.5px}
+/* ---------- AKSI ---------- */
+.aksi-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px}
+.aksi-form input,.aksi-form select,.aksi-form textarea{
+  padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:13px;
+  font-family:inherit;background:#fff;color:var(--text);width:100%;
+}
+.aksi-form textarea{resize:vertical;min-height:40px;grid-column:span 1}
+.aksi-form input:focus,.aksi-form select:focus,.aksi-form textarea:focus{outline:2px solid #bfdbfe;border-color:var(--primary-2)}
+.aksi-form .full{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  text-align:left;padding:11px 12px;background:#f7faff;color:var(--muted);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+td{padding:11px 12px;border-bottom:1px solid #f1f5fb;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fbfdff}
+.st{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+.st-belum{background:#f1f5f9;color:#64748b}
+.st-proses{background:#fef3c7;color:#b45309}
+.st-selesai{background:#dcfce7;color:#15803d}
+.st-terlambat{background:#fee2e2;color:#b91c1c}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13.5px}
+.empty .ico{font-size:38px;display:block;margin-bottom:10px;opacity:.5}
+.note{
+  background:#f0f7ff;border-left:4px solid var(--primary-2);border-radius:8px;
+  padding:11px 14px;font-size:12.5px;color:#1e3a8a;margin-bottom:16px;line-height:1.6;
+}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#16223b;color:#fff;padding:12px 22px;border-radius:11px;font-size:13.5px;font-weight:600;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.3s;z-index:999;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+/* ---------- MODAL ---------- */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(15,23,42,.55);
+  backdrop-filter:blur(3px);z-index:200;display:none;
+  align-items:flex-start;justify-content:center;padding:32px 20px;
+  overflow-y:auto;
+}
+.modal-backdrop.show{display:flex;animation:mFade .18s ease}
+@keyframes mFade{from{opacity:0}to{opacity:1}}
+.modal{
+  background:#fff;border-radius:16px;width:100%;max-width:860px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 24px 60px rgba(0,0,0,.32);
+  animation:mPop .24s cubic-bezier(.2,.9,.3,1.1);
+}
+@keyframes mPop{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.modal-head{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+  background:linear-gradient(135deg,#f7faff,#fff);
+}
+.modal-head h3{font-size:17px;font-weight:800;color:var(--primary-dark);letter-spacing:-.3px}
+.modal-head p{font-size:12.5px;color:var(--muted);margin-top:4px;max-width:560px}
+.modal-close{
+  border:none;background:#f1f5f9;color:var(--muted);
+  width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;
+  display:grid;place-items:center;transition:.15s;flex-shrink:0;
+}
+.modal-close:hover{background:#e2e8f0;color:var(--text)}
+.modal-body{padding:20px 22px 26px;overflow-y:auto;max-height:calc(90vh - 90px)}
+
+.mss-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;margin-bottom:20px;
+}
+.mss-item{
+  background:#f7faff;border:1px solid #e8eefb;border-radius:11px;
+  padding:12px 14px;
+}
+.mss-lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.mss-val{font-size:26px;font-weight:800;letter-spacing:-.8px;margin-top:5px;line-height:1.1;font-variant-numeric:tabular-nums}
+.mss-val small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
+.mss-item.hl-v{background:#eff6ff;border-color:#bfdbfe}
+.mss-item.hl-v .mss-val{color:var(--primary)}
+.mss-item.hl-m{background:#fffbeb;border-color:#fde68a}
+.mss-item.hl-m .mss-val{color:var(--amber)}
+
+.modal-crit{
+  border:1px solid var(--border);border-radius:12px;
+  margin-bottom:12px;overflow:hidden;
+}
+.modal-crit-head{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:11px 14px;background:linear-gradient(90deg,#f7faff,#fff);
+  border-bottom:1px solid var(--border);font-size:13.5px;
+}
+.modal-crit-head b{color:var(--primary-dark);font-weight:800}
+.modal-crit-head .mc-score{
+  font-size:12px;font-weight:800;color:var(--primary);
+  background:#eaf0fb;padding:4px 10px;border-radius:99px;
+  font-variant-numeric:tabular-nums;
+}
+.modal-crit.self-mode .modal-crit-head .mc-score{background:#fef3c7;color:var(--amber)}
+.modal-item-list{padding:4px 0}
+.modal-item-row{
+  display:grid;grid-template-columns:1fr 130px;gap:12px;
+  padding:9px 14px;border-bottom:1px dashed #eef2f9;
+  font-size:12.5px;align-items:center;
+}
+.modal-item-row:last-child{border-bottom:none}
+.mir-lbl{color:var(--text);line-height:1.45}
+.mir-val{
+  text-align:right;font-weight:800;font-variant-numeric:tabular-nums;
+  font-size:14.5px;color:var(--primary);white-space:nowrap;
+}
+.modal-crit.self-mode .mir-val{color:var(--amber)}
+.mir-val.empty{color:var(--muted);font-weight:600;font-size:12px;font-style:italic}
+@media(max-width:980px){
+  .item{grid-template-columns:1fr}
+  main{padding:18px 14px 60px}
+  header{padding:18px 16px}
+  nav.tabs{padding:0 14px}
+  .crit-row .nm{flex-basis:88px}
+  .crit-row .vl{flex-basis:130px;font-size:11px}
+  .dual-scores{grid-template-columns:1fr;padding:12px}
+  .dual-scores .sd-v{font-size:32px;letter-spacing:-1.2px}
+  .mss-val{font-size:22px}
+  .modal-item-row{grid-template-columns:1fr 100px;font-size:12px}
+  .mir-val{font-size:13px}
+  .modal-backdrop{padding:14px 10px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="brand">
+      <div class="logo">📊</div>
+      <div>
+        <h1>SIPANTAU OPD</h1>
+        <p>Monitoring Penilaian Kinerja Perangkat Daerah · Perbup Grobogan No. 3 Tahun 2026</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-light" onclick="exportData()">⬇️ Ekspor JSON</button>
+      <button class="btn btn-light" onclick="document.getElementById('importFile').click()">⬆️ Impor JSON</button>
+      <button class="btn btn-light" onclick="resetAll()">🗑️ Reset</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+  <div class="opd-bar">
+    <label for="opdName">Perangkat Daerah</label>
+    <input type="text" id="opdName" placeholder="Contoh: Dinas ABC" oninput="setOpd(this.value)">
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-view="dashboard" onclick="switchTab('dashboard',this)">📈 Dashboard</button>
+  <button data-view="checklist" onclick="switchTab('checklist',this)">✅ Checklist</button>
+  <button data-view="aksi" onclick="switchTab('aksi',this)">🗂️ Rencana Aksi</button>
+</nav>
+
+<main>
+  <!-- ============ DASHBOARD ============ -->
+  <section id="view-dashboard" class="view active">
+
+    <div class="note">
+      <b>Keterangan skor:</b> <b style="color:#1d4ed8">Skor Terverifikasi</b> = hasil final asesor (BAPPERIDA/BKPSDM/BPPKAD/Inspektorat). <b style="color:#b45309">Skor Pengisian Mandiri</b> = prediksi/pengisian mandiri OPD. Klik <b>🔍 Lihat detail</b> pada setiap kartu untuk melihat rincian subkriteria.
+    </div>
+
+    <div class="section-title"><span class="dot"></span>Capaian per Triwulan</div>
+    <div class="grid g4" id="twCards"></div>
+
+    <div style="height:22px"></div>
+
+    <div class="card card-pad">
+      <div class="section-title"><span class="dot"></span>Progres Pengisian Checklist</div>
+      <div id="progressRecap"></div>
+    </div>
+  </section>
+
+  <!-- ============ CHECKLIST ============ -->
+  <section id="view-checklist" class="view">
+    <div class="note">
+      Setiap subkriteria memiliki <b>dua kolom skor</b>:
+      <b style="color:#1d4ed8">Skor Final Terverifikasi</b> (hasil final asesor) dan
+      <b style="color:#b45309">Skor Pengisian Mandiri</b> (prediksi dinas/OPD).
+    </div>
+    <div class="filters">
+      <select id="fTw" onchange="renderChecklist()">
+        <option value="all">Semua Triwulan</option>
+        <option value="tw1">Triwulan I</option>
+        <option value="tw2">Triwulan II</option>
+        <option value="tw3">Triwulan III</option>
+        <option value="tw4">Triwulan IV</option>
+      </select>
+      <select id="fCrit" onchange="renderChecklist()">
+        <option value="all">Semua Kriteria</option>
+        <option value="Perencanaan">Perencanaan</option>
+        <option value="Pelaksanaan">Pelaksanaan</option>
+        <option value="Pelaporan">Pelaporan</option>
+        <option value="Capaian">Capaian</option>
+        <option value="Evaluasi">Evaluasi</option>
+        <option value="Tambahan">Tambahan</option>
+      </select>
+      <select id="fStatus" onchange="renderChecklist()">
+        <option value="all">Semua Status</option>
+        <option value="filled">Sudah dinilai (min. salah satu)</option>
+        <option value="empty">Belum dinilai</option>
+      </select>
+      <input type="text" id="fSearch" placeholder="🔍 Cari subkriteria..." oninput="renderChecklist()">
+    </div>
+    <div id="checklistArea"></div>
+  </section>
+
+  <!-- ============ AKSI ============ -->
+  <section id="view-aksi" class="view">
+    <div class="card card-pad" style="margin-bottom:18px">
+      <div class="section-title"><span class="dot"></span>Tambah / Edit Rencana Aksi</div>
+      <div class="aksi-form">
+        <input type="hidden" id="aId">
+        <input type="text" id="aNama" placeholder="Nama kegiatan / rencana aksi *" class="full">
+        <input type="text" id="aPic" placeholder="PIC (nama / jabatan)">
+        <input type="date" id="aTarget" title="Target penyelesaian">
+        <select id="aTw">
+          <option value="TW I">TW I</option>
+          <option value="TW II">TW II</option>
+          <option value="TW III">TW III</option>
+          <option value="TW IV">TW IV</option>
+        </select>
+        <select id="aCrit">
+          <option value="Perencanaan">Perencanaan</option>
+          <option value="Pelaksanaan">Pelaksanaan</option>
+          <option value="Pelaporan">Pelaporan</option>
+          <option value="Capaian">Capaian</option>
+          <option value="Evaluasi">Evaluasi</option>
+          <option value="Tambahan">Tambahan</option>
+        </select>
+        <select id="aStatus">
+          <option value="Belum">Belum</option>
+          <option value="Proses">Proses</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Terlambat">Terlambat</option>
+        </select>
+        <input type="text" id="aBukti" placeholder="Bukti dukung (link / nama file)">
+        <input type="text" id="aCatatan" placeholder="Catatan pimpinan" class="full">
+        <div class="full" style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="saveAksi()">💾 Simpan Rencana Aksi</button>
+          <button class="btn btn-ghost" onclick="clearAksiForm()">Batal</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="section-title" style="justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:8px"><span class="dot"></span>Daftar Rencana Aksi</span>
+        <span class="badge" id="aksiCount">0 item</span>
+      </div>
+      <div class="filters" style="margin-bottom:14px">
+        <select id="fAksiStatus" onchange="renderAksi()">
+          <option value="all">Semua Status</option>
+          <option value="Belum">Belum</option>
+          <option value="Proses">Proses</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Terlambat">Terlambat</option>
+        </select>
+        <select id="fAksiTw" onchange="renderAksi()">
+          <option value="all">Semua Triwulan</option>
+          <option value="TW I">TW I</option>
+          <option value="TW II">TW II</option>
+          <option value="TW III">TW III</option>
+          <option value="TW IV">TW IV</option>
+        </select>
+        <input type="text" id="fAksiSearch" placeholder="🔍 Cari kegiatan / PIC..." oninput="renderAksi()">
+      </div>
+      <div style="overflow-x:auto" id="aksiTableWrap"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ MODAL DETAIL SKOR ============ -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <h3 id="modalTitle">Detail Skor</h3>
+        <p id="modalSub"></p>
+      </div>
+      <button class="modal-close" id="modalCloseBtn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   DATA REFERENSI — LAMPIRAN II PERBUP GROBOGAN NOMOR 3 TAHUN 2026
+   ===================================================================== */
+const DATA = {
+  tw1: {
+    label: "Triwulan I",
+    criteria: [
+      { id:"Perencanaan", name:"Perencanaan", max:20, items:[
+        { id:"tw1_p1", label:"Kualitas Dokumen Perencanaan Perangkat Daerah (Renstra, Renja)", max:5,
+          penilai:"BAPPERIDA – Bidang Perencanaan, Pengendalian & Evaluasi",
+          options:[
+            {v:5,t:"Dokumen perencanaan benar dan tepat waktu"},
+            {v:4,t:"Dokumen perencanaan benar namun belum tepat waktu"},
+            {v:3,t:"Dokumen perencanaan sudah tepat waktu tapi belum benar"},
+            {v:2,t:"Dokumen perencanaan belum benar dan tidak tepat waktu"},
+            {v:1,t:"Hanya salah satu dokumen yang disusun"},
+            {v:0,t:"Dokumen perencanaan tidak disusun"}]},
+        { id:"tw1_p2", label:"Ketersediaan Kerangka Acuan Kerja (KAK)", max:5,
+          penilai:"BAPPERIDA – Bidang Perencanaan, Pengendalian & Evaluasi",
+          options:[
+            {v:5,t:"Tersedia KAK dengan jumlah memadai dan tepat waktu"},
+            {v:4,t:"Tersedia KAK dengan jumlah memadai namun belum tepat waktu"},
+            {v:3,t:"Tersedia KAK dengan jumlah kurang memadai namun tepat waktu"},
+            {v:2,t:"Tersedia KAK dengan jumlah kurang memadai dan tidak tepat waktu"},
+            {v:1,t:"Tidak tersedia KAK"}]},
+        { id:"tw1_p3", label:"Penyusunan Rencana Aksi", max:5,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:5,t:"Rencana Aksi disahkan Kepala PD & mencakup 5 kriteria (sasaran, program, kegiatan, subkegiatan, penanggung jawab)"},
+            {v:4,t:"Rencana Aksi mencakup 3 kriteria ketentuan"},
+            {v:3,t:"Rencana Aksi mencakup 2 kriteria ketentuan"},
+            {v:1,t:"Rencana Aksi mencakup 1 kriteria ketentuan"},
+            {v:0,t:"Tidak menyusun Rencana Aksi"}]},
+        { id:"tw1_p4", label:"Penyusunan Perjanjian Kinerja (PK)", max:5,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:5,t:"PK disusun sampai level individu"},
+            {v:4,t:"PK disusun sampai level Eselon IV"},
+            {v:3,t:"PK disusun sampai level Eselon III"},
+            {v:2,t:"PK disusun sampai level Eselon II / Kepala Perangkat Daerah"},
+            {v:0,t:"PK tidak disusun"}]}
+      ]},
+      { id:"Pelaksanaan", name:"Pelaksanaan", max:30, items:[
+        { id:"tw1_l1", label:"Deviasi Realisasi Keuangan (Jan–Des Tahun N-1)", max:5,
+          penilai:"SETDA – Bagian Administrasi Pembangunan",
+          options:[
+            {v:5,t:"Deviasi negatif < 5%"},
+            {v:3.75,t:"Deviasi negatif 5% s.d < 10%"},
+            {v:2.5,t:"Deviasi negatif 10% s.d < 15%"},
+            {v:1.25,t:"Deviasi negatif 15% s.d < 20%"},
+            {v:0,t:"Deviasi negatif ≥ 20%"}]},
+        { id:"tw1_l2", label:"Deviasi Realisasi Keuangan Triwulan I (Jan–Mar)", max:5,
+          penilai:"SETDA – Bagian Administrasi Pembangunan",
+          options:[
+            {v:5,t:"Deviasi negatif < 5%"},
+            {v:3.75,t:"Deviasi negatif 5% s.d < 10%"},
+            {v:2.5,t:"Deviasi negatif 10% s.d < 15%"},
+            {v:1.25,t:"Deviasi negatif 15% s.d < 20%"},
+            {v:0,t:"Deviasi negatif ≥ 20%"}]},
+        { id:"tw1_l3", label:"Revisi / Pergeseran Dokumen Pelaksanaan Anggaran (DPA)", max:2.5,
+          penilai:"BPPKAD – Bidang Anggaran",
+          options:[
+            {v:2.5,t:"Tidak ada revisi DPA"},
+            {v:2,t:"Revisi DPA dilakukan 1 kali"},
+            {v:1.5,t:"Revisi DPA dilakukan 2 kali"},
+            {v:1,t:"Revisi DPA dilakukan 3 kali"},
+            {v:0.5,t:"Revisi DPA dilakukan lebih dari 3 kali"}]},
+        { id:"tw1_l4", label:"Pengumuman Rencana Umum Pengadaan (RUP)", max:2.5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:2.5,t:"RUP diumumkan tahun anggaran sebelumnya dalam rangka tender"},
+            {v:2,t:"RUP lengkap diumumkan bulan Januari tahun berjalan"},
+            {v:1.5,t:"RUP lengkap diumumkan bulan Februari tahun berjalan"},
+            {v:1,t:"RUP lengkap diumumkan tanggal 1–15 Maret tahun berjalan"},
+            {v:0.5,t:"RUP lengkap diumumkan di atas tanggal 15 Maret"}]},
+        { id:"tw1_l5", label:"Sertifikasi Dasar Pengadaan & Kompetensi PPK Tipe C", max:5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:5,t:"Seluruh Eselon 3 telah memiliki sertifikasi & kompetensi PPK Tipe C"},
+            {v:4,t:"Di atas 50% Eselon 3 telah memiliki"},
+            {v:3,t:"25% s.d 50% Eselon 3 telah memiliki"},
+            {v:2,t:"< 25% Eselon 3 telah memiliki"},
+            {v:1,t:"Tidak ada Eselon 3 yang memiliki"}]},
+        { id:"tw1_l6a", label:"Rapat Koordinasi Monitoring Kinerja — Komponen Peserta", max:2,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:2,t:"Dipimpin Kepala PD/Eselon II, diikuti ≥ 50% jumlah pegawai"},
+            {v:1.5,t:"Dipimpin Kepala PD/Eselon II, diikuti < 50% jumlah pegawai"},
+            {v:1,t:"Dipimpin selain Kepala PD/Eselon II, diikuti ≥ 50% jumlah pegawai"},
+            {v:0.5,t:"Dipimpin selain Kepala PD/Eselon II, diikuti < 50% jumlah pegawai"},
+            {v:0,t:"Tidak melaksanakan rapat koordinasi monitoring kinerja"}]},
+        { id:"tw1_l6b", label:"Rapat Koordinasi Monitoring Kinerja — Waktu Pelaksanaan", max:3,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:3,t:"Dilaksanakan antara tanggal 1 s.d. 5 April"},
+            {v:1.5,t:"Dilaksanakan antara tanggal 6 s.d. 10 April"},
+            {v:0,t:"Tidak melaksanakan rapat koordinasi monitoring kinerja"}]},
+        { id:"tw1_l7", label:"Pengembangan Kompetensi Pegawai minimal 5 JP (Jan–Mar)", max:5,
+          penilai:"BKPSDM",
+          options:[
+            {v:5,t:"Jumlah pegawai memenuhi 5 JP > 90%"},
+            {v:4,t:"Jumlah pegawai memenuhi 5 JP 70% s.d 89%"},
+            {v:3,t:"Jumlah pegawai memenuhi 5 JP 50% s.d 69%"},
+            {v:2,t:"Jumlah pegawai memenuhi 5 JP 30% s.d 49%"},
+            {v:1,t:"Jumlah pegawai memenuhi 5 JP < 30%"}]}
+      ]},
+      { id:"Pelaporan", name:"Pelaporan", max:42.5, items:[
+        { id:"tw1_lp1a", label:"LKjIP Tahun N-1 — Materi LKjIP", max:3,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:3,t:"LKjIP disahkan Kepala PD & memenuhi 6 kriteria"},
+            {v:2.5,t:"LKjIP mencakup 5 kriteria ketentuan"},
+            {v:2,t:"LKjIP mencakup 4 kriteria ketentuan"},
+            {v:1.5,t:"LKjIP mencakup 3 kriteria ketentuan"},
+            {v:1,t:"LKjIP mencakup 2 kriteria ketentuan"},
+            {v:0.5,t:"LKjIP mencakup 1 kriteria ketentuan"},
+            {v:0,t:"Tidak menyusun LKjIP"}]},
+        { id:"tw1_lp1b", label:"LKjIP Tahun N-1 — Ketepatan Waktu", max:2,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:2,t:"Diunggah antara tanggal 1 s.d. 31 Januari"},
+            {v:1.5,t:"Diunggah antara tanggal 1 s.d. 15 Februari"},
+            {v:1,t:"Diunggah antara tanggal 16 s.d. akhir Februari"},
+            {v:0.5,t:"Diunggah antara tanggal 1 s.d. 31 Maret"},
+            {v:0,t:"Diunggah setelah bulan Maret atau tidak mengunggah"}]},
+        { id:"tw1_lp2", label:"Laporan Monitoring & Evaluasi Renaksi TW I (Jan–Mar)", max:5,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:5,t:"Menyajikan capaian tujuan, sasaran, program, sumber data, faktor keberhasilan/kegagalan, & rencana tindak lanjut"},
+            {v:4,t:"Menyajikan capaian, sumber data, faktor keberhasilan/kegagalan, tanpa rencana tindak lanjut"},
+            {v:3,t:"Menyajikan capaian, sumber data, tanpa faktor keberhasilan/kegagalan & rencana tindak lanjut"},
+            {v:2,t:"Menyajikan capaian tujuan, sasaran, program, tanpa sumber data, faktor, & RTL"},
+            {v:0,t:"Tidak menyusun laporan monitoring dan evaluasi Renaksi"}]},
+        { id:"tw1_lp3", label:"Laporan Aset (Aset Tetap & Lainnya) Jan–Des Tahun N-1", max:5,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:5,t:"Laporan benar & lengkap disampaikan sebelum tanggal 10 Januari Tahun N"},
+            {v:4,t:"Disampaikan antara tanggal 6 s.d. 10 bulan berikutnya"},
+            {v:3,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:2,t:"Disampaikan setelah tanggal 15 bulan berikutnya"}]},
+        { id:"tw1_lp4", label:"Laporan Barang Persediaan Jan–Des Tahun N-1", max:5,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:5,t:"Disampaikan sebelum tanggal 5 bulan berikutnya"},
+            {v:4,t:"Disampaikan antara tanggal 6 s.d. 10 bulan berikutnya"},
+            {v:3,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:2,t:"Disampaikan antara tanggal 16 s.d. 20 bulan berikutnya"},
+            {v:1,t:"Disampaikan setelah tanggal 20 bulan berikutnya"}]},
+        { id:"tw1_lp5", label:"Laporan Aset per Triwulan — TW I Tahun N", max:2.5,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:2.5,t:"Laporan benar & lengkap disampaikan sebelum tanggal 10 bulan berikutnya"},
+            {v:2,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:1.5,t:"Disampaikan antara tanggal 16 s.d. 20 bulan berikutnya"},
+            {v:1,t:"Disampaikan setelah tanggal 20 bulan berikutnya"}]},
+        { id:"tw1_lp6", label:"Laporan Barang Persediaan — TW I Tahun N", max:5,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:5,t:"Disampaikan sebelum tanggal 10 bulan berikutnya"},
+            {v:4,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:3,t:"Disampaikan antara tanggal 16 s.d. 20 bulan berikutnya"},
+            {v:2,t:"Disampaikan antara tanggal 21 s.d. 25 bulan berikutnya"},
+            {v:1,t:"Disampaikan setelah tanggal 25 bulan berikutnya"}]},
+        { id:"tw1_lp7", label:"Laporan Keuangan Tahunan SKPD (Tahun N-1)", max:5,
+          penilai:"BPPKAD – Bidang Akuntansi & Pelaporan",
+          options:[
+            {v:5,t:"Disampaikan Minggu Pertama s.d. Kedua Bulan Februari"},
+            {v:4,t:"Disampaikan Minggu Ketiga s.d. Keempat Bulan Februari"},
+            {v:3,t:"Disampaikan Minggu Pertama Bulan Maret"},
+            {v:2,t:"Disampaikan Minggu Kedua Bulan Maret"},
+            {v:1,t:"Disampaikan setelah Minggu Kedua Bulan Maret"}]},
+        { id:"tw1_lp8", label:"Berita Acara Rekonsiliasi Pendapatan & Belanja Bulanan TW I", max:5,
+          penilai:"BPPKAD – Bidang Akuntansi & Pelaporan",
+          options:[
+            {v:5,t:"Disampaikan setiap bulan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Disampaikan setiap bulan antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Disampaikan setiap bulan antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Disampaikan setiap bulan antara tanggal 25 s.d. 31 bulan berikutnya"},
+            {v:1,t:"Disampaikan setiap bulan setelah tanggal 30/31 bulan berikutnya"}]},
+        { id:"tw1_lp9", label:"Laporan LPJ Fungsional TW I", max:5,
+          penilai:"BPPKAD – Bidang Perbendaharaan",
+          options:[
+            {v:5,t:"Disampaikan setiap bulan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Disampaikan setiap bulan antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Disampaikan setiap bulan antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Disampaikan setiap bulan antara tanggal 25 s.d. 31 bulan berikutnya"},
+            {v:1,t:"Disampaikan setiap bulan setelah tanggal 30/31 bulan berikutnya"}]}
+      ]},
+      { id:"Capaian", name:"Capaian", max:7.5, items:[
+        { id:"tw1_c1", label:"Laporan Pemantauan atas Dokumen RTP / Rencana Tindak Pengendalian", max:5,
+          penilai:"Inspektorat",
+          options:[
+            {v:5,t:"Laporan disampaikan tanggal 1 s.d. 10 April"},
+            {v:3,t:"Laporan disampaikan tanggal 11 s.d. 20 April"},
+            {v:1,t:"Laporan disampaikan setelah tanggal 20 April"}]},
+        { id:"tw1_c2", label:"Nilai Indeks Kepuasan Masyarakat (IKM)", max:2.5,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:2.5,t:"Nilai IKM > 90 s.d. 100"},
+            {v:2,t:"Nilai IKM > 80 s.d. 90"},
+            {v:1.5,t:"Nilai IKM > 70 s.d. 80"},
+            {v:1,t:"Nilai IKM > 60 s.d. 70"},
+            {v:0.5,t:"Nilai IKM di bawah 60"},
+            {v:0,t:"Tidak mengirimkan Laporan IKM"}]}
+      ]}
+    ]
+  },
+
+  tw2: {
+    label: "Triwulan II",
+    criteria: [
+      { id:"Perencanaan", name:"Perencanaan", max:10, items:[
+        { id:"tw2_p1", label:"Rencana Kebutuhan Barang Milik Daerah (BMD)", max:10,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:10,t:"Dikumpulkan pada Minggu Pertama bulan Juni"},
+            {v:7.5,t:"Dikumpulkan pada Minggu Kedua bulan Juni"},
+            {v:5,t:"Dikumpulkan pada Minggu Ketiga bulan Juni"},
+            {v:2.5,t:"Dikumpulkan pada Minggu Keempat bulan Juni"}]}
+      ]},
+      { id:"Pelaksanaan", name:"Pelaksanaan", max:45, items:[
+        { id:"tw2_l1", label:"Deviasi Realisasi Keuangan Triwulan II", max:10,
+          penilai:"SETDA – Bagian Administrasi Pembangunan",
+          options:[
+            {v:10,t:"Deviasi negatif < 5%"},
+            {v:8,t:"Deviasi negatif 5% s.d < 10%"},
+            {v:6,t:"Deviasi negatif 10% s.d < 15%"},
+            {v:4,t:"Deviasi negatif 15% s.d < 20%"},
+            {v:2,t:"Deviasi negatif ≥ 20%"}]},
+        { id:"tw2_l2", label:"Revisi / Pergeseran Dokumen Pelaksanaan Anggaran (DPA)", max:10,
+          penilai:"BPPKAD – Bidang Anggaran",
+          options:[
+            {v:10,t:"Tidak ada revisi DPA"},
+            {v:8,t:"Revisi DPA dilakukan 1 kali"},
+            {v:6,t:"Revisi DPA dilakukan 2 kali"},
+            {v:4,t:"Revisi DPA dilakukan 3 kali"},
+            {v:2,t:"Revisi DPA dilakukan lebih dari 3 kali"}]},
+        { id:"tw2_l3", label:"Revisi Rencana Umum Pengadaan (RUP) dalam SIRUP", max:5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:5,t:"Revisi RUP 0–5 paket"},
+            {v:4,t:"Revisi RUP 6–10 paket"},
+            {v:3,t:"Revisi RUP 11–15 paket"},
+            {v:2,t:"Revisi RUP 16–20 paket"},
+            {v:1,t:"Revisi RUP lebih dari 20 paket"}]},
+        { id:"tw2_l4", label:"Sertifikasi Dasar Pengadaan & Kompetensi PPK Tipe C", max:5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:5,t:"Seluruh Eselon 3 telah memiliki"},
+            {v:4,t:"Di atas 50% Eselon 3 telah memiliki"},
+            {v:3,t:"25% s.d 50% Eselon 3 telah memiliki"},
+            {v:2,t:"< 25% Eselon 3 telah memiliki"},
+            {v:1,t:"Tidak ada Eselon 3 yang memiliki"}]},
+        { id:"tw2_l5a", label:"Rapat Koordinasi Monitoring Kinerja — Komponen Peserta", max:4,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:4,t:"Dipimpin Kepala PD/Eselon II, diikuti ≥ 50% pegawai"},
+            {v:3,t:"Dipimpin Kepala PD/Eselon II, diikuti < 50% pegawai"},
+            {v:2,t:"Dipimpin selain Kepala PD/Eselon II, diikuti ≥ 50% pegawai"},
+            {v:1,t:"Dipimpin selain Kepala PD/Eselon II, diikuti < 50% pegawai"},
+            {v:0,t:"Tidak melaksanakan rapat koordinasi"}]},
+        { id:"tw2_l5b", label:"Rapat Koordinasi Monitoring Kinerja — Waktu Pelaksanaan", max:6,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:6,t:"Dilaksanakan antara tanggal 1 s.d. 5 Juli"},
+            {v:4.5,t:"Dilaksanakan antara tanggal 6 s.d. 10 Juli"},
+            {v:0,t:"Tidak melaksanakan rapat koordinasi"}]},
+        { id:"tw2_l6", label:"Pengembangan Kompetensi Pegawai minimal 5 JP (Apr–Jun)", max:5,
+          penilai:"BKPSDM",
+          options:[
+            {v:5,t:"Jumlah pegawai memenuhi 5 JP ≥ 90%"},
+            {v:4,t:"70% s.d 89%"},
+            {v:3,t:"50% s.d 69%"},
+            {v:2,t:"30% s.d 49%"},
+            {v:1,t:"< 30%"}]}
+      ]},
+      { id:"Pelaporan", name:"Pelaporan", max:35, items:[
+        { id:"tw2_lp1", label:"Laporan Monitoring & Evaluasi Renaksi TW II (Apr–Jun)", max:10,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:10,t:"Menyajikan capaian tujuan, sasaran, program, sumber data, faktor keberhasilan/kegagalan, & RTL"},
+            {v:7.5,t:"Menyajikan capaian, sumber data, faktor, tanpa RTL"},
+            {v:5,t:"Menyajikan capaian, sumber data, tanpa faktor & RTL"},
+            {v:2.5,t:"Menyajikan capaian tujuan, sasaran, program, tanpa sumber data, faktor & RTL"},
+            {v:0,t:"Tidak menyusun laporan monitoring dan evaluasi Renaksi"}]},
+        { id:"tw2_lp2", label:"Laporan Aset (Aset Tetap & Lainnya) per Triwulan", max:10,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:10,t:"Laporan benar & lengkap disampaikan sebelum tanggal 10 bulan berikutnya"},
+            {v:7.5,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:5,t:"Disampaikan antara tanggal 16 s.d. 20 bulan berikutnya"}]},
+        { id:"tw2_lp3", label:"Laporan Barang Persediaan TW II", max:5,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:5,t:"Disampaikan sebelum tanggal 10 bulan berikutnya"},
+            {v:4,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:3,t:"Disampaikan antara tanggal 16 s.d. 20 bulan berikutnya"},
+            {v:2,t:"Disampaikan antara tanggal 21 s.d. 25 bulan berikutnya"},
+            {v:1,t:"Disampaikan setelah tanggal 25 bulan berikutnya"}]},
+        { id:"tw2_lp4", label:"Berita Acara Rekonsiliasi Pendapatan & Belanja Bulanan TW II", max:5,
+          penilai:"BPPKAD – Bidang Akuntansi & Pelaporan",
+          options:[
+            {v:5,t:"Disampaikan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Antara tanggal 25 s.d. 31 bulan berikutnya"},
+            {v:1,t:"Setelah tanggal 30/31 bulan berikutnya"}]},
+        { id:"tw2_lp5", label:"Laporan LPJ Fungsional TW II", max:5,
+          penilai:"BPPKAD – Bidang Perbendaharaan",
+          options:[
+            {v:5,t:"Disampaikan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Antara tanggal 25 s.d. 30 bulan berikutnya"},
+            {v:1,t:"Setelah tanggal 30/31 bulan berikutnya"}]}
+      ]},
+      { id:"Capaian", name:"Capaian", max:10, items:[
+        { id:"tw2_c1", label:"Laporan Pemantauan atas Dokumen RTP", max:5,
+          penilai:"Inspektorat",
+          options:[
+            {v:5,t:"Laporan disampaikan tanggal 1 s.d. 10 Juli"},
+            {v:3,t:"Laporan disampaikan tanggal 11 s.d. 20 Juli"},
+            {v:1,t:"Laporan disampaikan setelah tanggal 20 Juli"}]},
+        { id:"tw2_c2", label:"Nilai Indeks Kepuasan Masyarakat (IKM)", max:5,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:5,t:"Nilai IKM > 90 s.d. 100"},
+            {v:4,t:"Nilai IKM > 80 s.d. 90"},
+            {v:3,t:"Nilai IKM > 70 s.d. 80"},
+            {v:2,t:"Nilai IKM > 60 s.d. 70"},
+            {v:1,t:"Nilai IKM di bawah 60"},
+            {v:0,t:"Tidak mengirimkan Laporan IKM"}]}
+      ]}
+    ]
+  },
+
+  tw3: {
+    label: "Triwulan III",
+    criteria: [
+      { id:"Pelaksanaan", name:"Pelaksanaan", max:45, items:[
+        { id:"tw3_l1", label:"Deviasi Realisasi Keuangan Triwulan III", max:10,
+          penilai:"SETDA – Bagian Administrasi Pembangunan",
+          options:[
+            {v:10,t:"Deviasi negatif < 5%"},
+            {v:8,t:"Deviasi negatif 5% s.d < 10%"},
+            {v:6,t:"Deviasi negatif 10% s.d < 15%"},
+            {v:4,t:"Deviasi negatif 15% s.d < 20%"},
+            {v:2,t:"Deviasi negatif ≥ 20%"}]},
+        { id:"tw3_l2", label:"Revisi / Pergeseran Dokumen Pelaksanaan Anggaran (DPA)", max:10,
+          penilai:"BPPKAD – Bidang Anggaran",
+          options:[
+            {v:10,t:"Tidak ada revisi DPA"},
+            {v:8,t:"Revisi DPA dilakukan 1 kali"},
+            {v:6,t:"Revisi DPA dilakukan 2 kali"},
+            {v:4,t:"Revisi DPA dilakukan 3 kali"},
+            {v:2,t:"Revisi DPA dilakukan lebih dari 3 kali"}]},
+        { id:"tw3_l3", label:"Revisi Rencana Umum Pengadaan (RUP) dalam SIRUP", max:5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:5,t:"Revisi RUP 0–5 paket"},
+            {v:4,t:"Revisi RUP 6–10 paket"},
+            {v:3,t:"Revisi RUP 11–15 paket"},
+            {v:2,t:"Revisi RUP 16–20 paket"},
+            {v:1,t:"Revisi RUP lebih dari 20 paket"}]},
+        { id:"tw3_l4", label:"Sertifikasi Dasar Pengadaan & Kompetensi PPK Tipe C", max:5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:5,t:"Seluruh Eselon 3 telah memiliki"},
+            {v:4,t:"Di atas 50% Eselon 3 telah memiliki"},
+            {v:3,t:"25% s.d 50% Eselon 3 telah memiliki"},
+            {v:2,t:"< 25% Eselon 3 telah memiliki"},
+            {v:1,t:"Tidak ada Eselon 3 yang memiliki"}]},
+        { id:"tw3_l5a", label:"Rapat Koordinasi Monitoring Kinerja — Komponen Peserta", max:4,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:4,t:"Dipimpin Kepala PD/Eselon II, diikuti ≥ 50% pegawai"},
+            {v:3,t:"Dipimpin Kepala PD/Eselon II, diikuti < 50% pegawai"},
+            {v:2,t:"Dipimpin selain Kepala PD/Eselon II, diikuti ≥ 50% pegawai"},
+            {v:1,t:"Dipimpin selain Kepala PD/Eselon II, diikuti < 50% pegawai"},
+            {v:0,t:"Tidak melaksanakan rapat koordinasi"}]},
+        { id:"tw3_l5b", label:"Rapat Koordinasi Monitoring Kinerja — Waktu Pelaksanaan", max:6,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:6,t:"Dilaksanakan antara tanggal 1 s.d. 5 Oktober"},
+            {v:4.5,t:"Dilaksanakan antara tanggal 6 s.d. 10 Oktober"},
+            {v:0,t:"Tidak melaksanakan rapat koordinasi"}]},
+        { id:"tw3_l6", label:"Pengembangan Kompetensi Pegawai minimal 5 JP (Jul–Sep)", max:5,
+          penilai:"BKPSDM",
+          options:[
+            {v:5,t:"Jumlah pegawai memenuhi 5 JP > 90%"},
+            {v:4,t:"70% s.d 89%"},
+            {v:3,t:"50% s.d 69%"},
+            {v:2,t:"30% s.d 49%"},
+            {v:1,t:"< 30%"}]}
+      ]},
+      { id:"Pelaporan", name:"Pelaporan", max:40, items:[
+        { id:"tw3_lp1", label:"Laporan Monitoring & Evaluasi Renaksi TW III (Jul–Sep)", max:10,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:10,t:"Menyajikan capaian tujuan, sasaran, program, sumber data, faktor keberhasilan/kegagalan, & RTL"},
+            {v:7.5,t:"Menyajikan capaian, sumber data, faktor, tanpa RTL"},
+            {v:5,t:"Menyajikan capaian, sumber data, tanpa faktor & RTL"},
+            {v:2.5,t:"Menyajikan capaian tujuan, sasaran, program, tanpa sumber data, faktor & RTL"},
+            {v:0,t:"Tidak menyusun laporan monitoring dan evaluasi Renaksi"}]},
+        { id:"tw3_lp2", label:"Laporan Aset (Aset Tetap & Lainnya) per Triwulan", max:10,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:10,t:"Laporan benar & lengkap disampaikan sebelum tanggal 10 bulan berikutnya"},
+            {v:7.5,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:5,t:"Disampaikan antara tanggal 16 s.d. 20 bulan berikutnya"},
+            {v:2.5,t:"Disampaikan setelah tanggal 20 bulan berikutnya"}]},
+        { id:"tw3_lp3", label:"Laporan Barang Persediaan TW III", max:5,
+          penilai:"BPPKAD – Bidang Aset Daerah",
+          options:[
+            {v:5,t:"Disampaikan sebelum tanggal 10 bulan berikutnya"},
+            {v:4,t:"Disampaikan antara tanggal 11 s.d. 15 bulan berikutnya"},
+            {v:3,t:"Disampaikan antara tanggal 16 s.d. 20 bulan berikutnya"},
+            {v:2,t:"Disampaikan antara tanggal 21 s.d. 25 bulan berikutnya"},
+            {v:1,t:"Disampaikan setelah tanggal 25 bulan berikutnya"}]},
+        { id:"tw3_lp4", label:"Laporan Keuangan Semesteran SKPD", max:5,
+          penilai:"BPPKAD – Bidang Akuntansi & Pelaporan",
+          options:[
+            {v:5,t:"Disampaikan paling lambat tanggal 10 Juli"},
+            {v:4,t:"Disampaikan antara tanggal 11 s.d. 15 Juli"},
+            {v:3,t:"Disampaikan antara tanggal 16 s.d. 21 Juli"},
+            {v:2,t:"Disampaikan antara tanggal 22 s.d. 26 Juli"},
+            {v:1,t:"Disampaikan antara tanggal 27 s.d. 31 Juli"}]},
+        { id:"tw3_lp5", label:"Berita Acara Rekonsiliasi Pendapatan & Belanja Bulanan TW III", max:5,
+          penilai:"BPPKAD – Bidang Akuntansi & Pelaporan",
+          options:[
+            {v:5,t:"Disampaikan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Antara tanggal 25 s.d. 31 bulan berikutnya"},
+            {v:1,t:"Setelah tanggal 30/31 bulan berikutnya"}]},
+        { id:"tw3_lp6", label:"Laporan LPJ Fungsional TW III", max:5,
+          penilai:"BPPKAD – Bidang Perbendaharaan",
+          options:[
+            {v:5,t:"Disampaikan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Antara tanggal 25 s.d. 31 bulan berikutnya"},
+            {v:1,t:"Setelah tanggal 30/31 bulan berikutnya"}]}
+      ]},
+      { id:"Capaian", name:"Capaian", max:15, items:[
+        { id:"tw3_c1", label:"Laporan Pemantauan atas Dokumen RTP", max:5,
+          penilai:"Inspektorat",
+          options:[
+            {v:5,t:"Laporan disampaikan tanggal 1 s.d. 10 Oktober"},
+            {v:3,t:"Laporan disampaikan tanggal 11 s.d. 20 Oktober"},
+            {v:1,t:"Laporan disampaikan setelah tanggal 20 Oktober"}]},
+        { id:"tw3_c2", label:"Nilai Indeks Kepuasan Masyarakat (IKM)", max:10,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:10,t:"Nilai IKM > 90 s.d. 100"},
+            {v:8,t:"Nilai IKM > 80 s.d. 90"},
+            {v:6,t:"Nilai IKM > 70 s.d. 80"},
+            {v:4,t:"Nilai IKM > 60 s.d. 70"},
+            {v:2,t:"Nilai IKM di bawah 60"},
+            {v:0,t:"Tidak mengirimkan Laporan IKM"}]}
+      ]}
+    ]
+  },
+
+  tw4: {
+    label: "Triwulan IV",
+    criteria: [
+      { id:"Pelaksanaan", name:"Pelaksanaan", max:45, items:[
+        { id:"tw4_l1", label:"Deviasi Realisasi Keuangan Bulan Oktober & November", max:10,
+          penilai:"SETDA – Bagian Administrasi Pembangunan",
+          options:[
+            {v:10,t:"Deviasi negatif < 5%"},
+            {v:8,t:"Deviasi negatif 5% s.d < 10%"},
+            {v:6,t:"Deviasi negatif 10% s.d < 15%"},
+            {v:4,t:"Deviasi negatif 15% s.d < 20%"},
+            {v:2,t:"Deviasi negatif ≥ 20%"}]},
+        { id:"tw4_l2", label:"Revisi / Pergeseran Dokumen Pelaksanaan Anggaran (DPA)", max:5,
+          penilai:"BPPKAD – Bidang Anggaran",
+          options:[
+            {v:5,t:"Tidak ada revisi DPA"},
+            {v:4,t:"Revisi DPA dilakukan 1 kali"},
+            {v:3,t:"Revisi DPA dilakukan 2 kali"},
+            {v:2,t:"Revisi DPA dilakukan 3 kali"},
+            {v:1,t:"Revisi DPA dilakukan lebih dari 3 kali"}]},
+        { id:"tw4_l3", label:"Revisi Rencana Umum Pengadaan (RUP) dalam SIRUP", max:5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:5,t:"Revisi RUP 0–5 paket"},
+            {v:4,t:"Revisi RUP 6–10 paket"},
+            {v:3,t:"Revisi RUP 11–15 paket"},
+            {v:2,t:"Revisi RUP 16–20 paket"},
+            {v:1,t:"Revisi RUP lebih dari 20 paket"}]},
+        { id:"tw4_l4", label:"Sertifikasi Dasar Pengadaan & Kompetensi PPK Tipe C", max:5,
+          penilai:"SETDA – Bagian Pengadaan Barang & Jasa",
+          options:[
+            {v:5,t:"Seluruh Eselon 3 telah memiliki"},
+            {v:4,t:"Di atas 50% Eselon 3 telah memiliki"},
+            {v:3,t:"25% s.d 50% Eselon 3 telah memiliki"},
+            {v:2,t:"< 25% Eselon 3 telah memiliki"},
+            {v:1,t:"Tidak ada Eselon 3 yang memiliki"}]},
+        { id:"tw4_l5", label:"Pengembangan Kompetensi Pegawai minimal 20 JP (Jan–Des)", max:10,
+          penilai:"BKPSDM",
+          options:[
+            {v:10,t:"Jumlah pegawai memenuhi 20 JP ≥ 90%"},
+            {v:8,t:"70% s.d 89%"},
+            {v:6,t:"50% s.d 69%"},
+            {v:4,t:"30% s.d 49%"},
+            {v:2,t:"< 30%"}]},
+        { id:"tw4_l6", label:"Kontribusi terhadap Indeks Inovasi Daerah (IGA)", max:6,
+          penilai:"BAPPERIDA – Bidang Riset & Inovasi Daerah",
+          options:[
+            {v:6,t:"Skor kematangan rata-rata > 100, minimal skor 60, jumlah inovasi minimal 3"},
+            {v:5.4,t:"Skor kematangan rata-rata > 100, minimal skor 60, jumlah inovasi < 3"},
+            {v:4.8,t:"Skor kematangan rata-rata 91–100, minimal skor 60, jumlah inovasi minimal 3"},
+            {v:4.2,t:"Skor kematangan rata-rata 91–100, minimal skor 60, jumlah inovasi < 3"},
+            {v:3.6,t:"Skor kematangan rata-rata 81–90, minimal skor 60, jumlah inovasi minimal 3"},
+            {v:3,t:"Skor kematangan rata-rata 81–90, minimal skor 60, jumlah inovasi < 3"},
+            {v:2.4,t:"Skor kematangan rata-rata 71–80, minimal skor 60, jumlah inovasi minimal 3"},
+            {v:1.8,t:"Skor kematangan rata-rata 71–80, minimal skor 60, jumlah inovasi < 3"},
+            {v:1.2,t:"Skor kematangan rata-rata 60–70, minimal skor 60, jumlah inovasi minimal 3"},
+            {v:0.6,t:"Skor kematangan rata-rata 60–70, minimal skor 60, jumlah inovasi < 3"},
+            {v:0,t:"Tidak mengirimkan inovasi IGA atau skor kematangan di bawah 60"}]},
+        { id:"tw4_l7", label:"Partisipasi Lomba Inovasi Daerah", max:4,
+          penilai:"BAPPERIDA – Bidang Riset & Inovasi Daerah",
+          options:[
+            {v:4,t:"Perangkat Daerah dengan peringkat 1, 2, 3"},
+            {v:3.2,t:"Perangkat Daerah dengan peringkat 4, 5, 6"},
+            {v:2.4,t:"Lolos tahap penilaian lomba inovasi melalui presentasi"},
+            {v:1.6,t:"Mengirimkan lebih dari 1 judul inovasi"},
+            {v:0.8,t:"Mengirimkan hanya 1 judul inovasi"},
+            {v:0,t:"Tidak mengikuti lomba inovasi"}]}
+      ]},
+      { id:"Pelaporan", name:"Pelaporan", max:10, items:[
+        { id:"tw4_lp1", label:"Berita Acara Rekonsiliasi Pendapatan & Belanja Bulanan TW IV (Okt–Nov)", max:5,
+          penilai:"BPPKAD – Bidang Akuntansi & Pelaporan",
+          options:[
+            {v:5,t:"Disampaikan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Antara tanggal 25 s.d. 30 bulan berikutnya"},
+            {v:1,t:"Setelah tanggal 30/31 bulan berikutnya"}]},
+        { id:"tw4_lp2", label:"Laporan LPJ Fungsional TW IV (Okt–Nov)", max:5,
+          penilai:"BPPKAD – Bidang Perbendaharaan",
+          options:[
+            {v:5,t:"Disampaikan paling lambat tanggal 10 bulan berikutnya"},
+            {v:4,t:"Antara tanggal 11 s.d. 17 bulan berikutnya"},
+            {v:3,t:"Antara tanggal 18 s.d. 24 bulan berikutnya"},
+            {v:2,t:"Antara tanggal 25 s.d. 31 bulan berikutnya"},
+            {v:1,t:"Setelah tanggal 30/31 bulan berikutnya"}]}
+      ]},
+      { id:"Capaian", name:"Capaian", max:20, items:[
+        { id:"tw4_c1", label:"Laporan Pemantauan atas Dokumen RTP", max:10,
+          penilai:"Inspektorat",
+          options:[
+            {v:10,t:"Laporan disampaikan sebelum tanggal 5 Desember"},
+            {v:5,t:"Laporan disampaikan antara tanggal 6 s.d. 10 Desember"},
+            {v:2.5,t:"Laporan disampaikan setelah tanggal 10 Desember"}]},
+        { id:"tw4_c2", label:"Nilai Indeks Kepuasan Masyarakat (IKM)", max:10,
+          penilai:"SETDA – Bagian Organisasi",
+          options:[
+            {v:10,t:"Nilai IKM > 90 s.d. 100"},
+            {v:8,t:"Nilai IKM > 80 s.d. 90"},
+            {v:6,t:"Nilai IKM > 70 s.d. 80"},
+            {v:4,t:"Nilai IKM > 60 s.d. 70"},
+            {v:2,t:"Nilai IKM di bawah 60"},
+            {v:0,t:"Tidak mengirimkan Laporan IKM"}]}
+      ]},
+      { id:"Evaluasi", name:"Evaluasi", max:25, items:[
+        { id:"tw4_e1", label:"Evaluasi Akuntabilitas Kinerja Instansi Pemerintah (AKIP)", max:15,
+          penilai:"Inspektorat",
+          options:[
+            {v:15,t:"Predikat Evaluasi AKIP AA"},
+            {v:12.5,t:"Predikat Evaluasi AKIP A"},
+            {v:10,t:"Predikat Evaluasi AKIP BB"},
+            {v:7.5,t:"Predikat Evaluasi AKIP B"},
+            {v:5,t:"Predikat Evaluasi AKIP CC"},
+            {v:2.5,t:"Predikat Evaluasi AKIP C ke bawah"}]},
+        { id:"tw4_e2", label:"Tindak Lanjut Rekomendasi Evaluasi AKIP Tahun N-1", max:10,
+          penilai:"Inspektorat",
+          options:[
+            {v:10,t:"Penyelesaian TLHP sebesar 100%"},
+            {v:8,t:"Penyelesaian TLHP 90% s.d < 100%"},
+            {v:6,t:"Penyelesaian TLHP 80% s.d < 90%"},
+            {v:4,t:"Penyelesaian TLHP 70% s.d < 80%"},
+            {v:2,t:"Penyelesaian TLHP < 70%"}]}
+      ]},
+      { id:"Tambahan", name:"Tambahan (PD Sampel)", max:100, isTambahan:true, items:[
+        { id:"tw4_t1", label:"Penilaian Zona Integritas (diusulkan ke KemenPANRB)", max:20, type:"number",
+          penilai:"Inspektorat" },
+        { id:"tw4_t2", label:"Penilaian Kepatuhan Standar Pelayanan Publik", max:25, type:"number",
+          penilai:"Inspektorat" },
+        { id:"tw4_t3", label:"Penilaian Pemantauan Kinerja Penyelenggaraan Pelayanan Publik", max:25, type:"number",
+          penilai:"Inspektorat" },
+        { id:"tw4_t4", label:"Wilayah Bebas dari Korupsi (WBK)", max:30, type:"number",
+          penilai:"Inspektorat" }
+      ]}
+    ]
+  }
+};
+
+/* =====================================================================
+   STATE — 2 peta skor
+   ===================================================================== */
+const STORAGE_KEY = "sipantau_opd_v2";
+let state = {
+  opd: "",
+  scores: {},      // SKOR TERVERIFIKASI (asesor)
+  selfScores: {},  // SKOR PENGISIAN MANDIRI (dinas)
+  actions: []
+};
+
+/* =====================================================================
+   UTIL
+   ===================================================================== */
+function fmt(n){
+  if(n === null || n === undefined || isNaN(n)) return "0";
+  const r = Math.round(n * 100) / 100;
+  return r.toLocaleString("id-ID", { maximumFractionDigits: 2 });
+}
+function fmtPct(n){
+  if(!isFinite(n) || isNaN(n)) return "0";
+  return n.toLocaleString("id-ID", { maximumFractionDigits: 1 });
+}
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._to);
+  t._to = setTimeout(()=>t.classList.remove("show"), 2400);
+}
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function predikatColor(v){
+  if(v >= 90) return "pred-AA";
+  if(v >= 80) return "pred-A";
+  if(v >= 70) return "pred-BB";
+  if(v >= 60) return "pred-B";
+  return "pred-C";
+}
+function predikatLabel(v){
+  if(v >= 90) return "Sangat Baik (AA)";
+  if(v >= 80) return "Baik (A)";
+  if(v >= 70) return "Cukup (BB)";
+  if(v >= 60) return "Sedang (B)";
+  return "Perlu Perbaikan";
+}
+function isFilled(v){
+  return v !== undefined && v !== null && v !== "" && !isNaN(Number(v));
+}
+
+/* =====================================================================
+   PERSISTENCE
+   ===================================================================== */
+function save(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ console.warn("Gagal menyimpan:", e); }
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("sipantau_opd_v1");
+    if(raw){
+      const p = JSON.parse(raw);
+      state.opd = p.opd || "";
+      state.scores = p.scores || {};
+      state.selfScores = p.selfScores || {};
+      state.actions = p.actions || [];
+    }
+  }catch(e){ console.warn("Gagal memuat:", e); }
+}
+function setOpd(v){ state.opd = v; save(); }
+function exportData(){
+  const payload = {
+    _app: "SIPANTAU OPD",
+    _ref: "Perbup Grobogan No. 3 Tahun 2026",
+    _exported: new Date().toISOString(),
+    data: state
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const slug = (state.opd || "opd").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40);
+  const d = new Date();
+  a.href = url;
+  a.download = `sipantau-${slug || "opd"}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Data berhasil diekspor ke JSON");
+}
+function importData(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const parsed = JSON.parse(e.target.result);
+      const d = parsed.data || parsed;
+      if(typeof d !== "object" || !d) throw new Error("Format tidak valid");
+      if(!confirm("Impor data ini? Data yang ada saat ini akan ditimpa.")) return;
+      state.opd = d.opd || "";
+      state.scores = d.scores || {};
+      state.selfScores = d.selfScores || {};
+      state.actions = Array.isArray(d.actions) ? d.actions : [];
+      save();
+      document.getElementById("opdName").value = state.opd;
+      renderAll();
+      toast("Data berhasil diimpor");
+    }catch(err){
+      alert("Gagal membaca file JSON: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = "";
+}
+function resetAll(){
+  if(!confirm("Hapus SEMUA data (checklist, rencana aksi, nama OPD)? Tindakan ini tidak dapat dibatalkan.")) return;
+  state = { opd:"", scores:{}, selfScores:{}, actions:[] };
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById("opdName").value = "";
+  renderAll();
+  toast("Semua data telah direset");
+}
+
+/* =====================================================================
+   CALCULATIONS
+   ===================================================================== */
+function computePrediksi(twKey, getVal){
+  const tw = DATA[twKey];
+  if(twKey === "tw4"){
+    let v15 = 0, m15 = 0;
+    let v6 = 0, m6 = 0, has6 = false;
+    tw.criteria.forEach(c => {
+      c.items.forEach(it => {
+        const val = getVal(it);
+        if(isFilled(val)){
+          if(c.isTambahan){ v6 += Number(val); m6 += it.max; has6 = true; }
+          else { v15 += Number(val); m15 += it.max; }
+        }
+      });
+    });
+    const p15 = m15 > 0 ? (v15 / m15) * 100 : 0;
+    if(has6 && m6 > 0){
+      const p6 = (v6 / m6) * 100;
+      return 0.9 * p15 + 0.1 * p6;
+    }
+    return p15;
+  }
+  let v = 0, m = 0;
+  tw.criteria.forEach(c => {
+    c.items.forEach(it => {
+      const val = getVal(it);
+      if(isFilled(val)){ v += Number(val); m += it.max; }
+    });
+  });
+  return m > 0 ? (v / m) * 100 : 0;
+}
+
+function calcTw(twKey){
+  const tw = DATA[twKey];
+  let vTotal = 0, sTotal = 0, vAnswered = 0, sAnswered = 0, totalItems = 0;
+
+  const perCrit = tw.criteria.map(c => {
+    let cV = 0, cS = 0, cAnsV = 0, cAnsS = 0;
+    c.items.forEach(it => {
+      totalItems++;
+      const v = state.scores[it.id];
+      const s = state.selfScores[it.id];
+      if(isFilled(v)){ cV += Number(v); cAnsV++; }
+      if(isFilled(s)){ cS += Number(s); cAnsS++; }
+    });
+    vTotal += cV; sTotal += cS;
+    vAnswered += cAnsV; sAnswered += cAnsS;
+    const maxA = c.items.reduce((a,it)=> a + (isFilled(state.scores[it.id]) ? it.max : 0), 0);
+    const maxSelf = c.items.reduce((a,it)=> a + (isFilled(state.selfScores[it.id]) ? it.max : 0), 0);
+    return {
+      id: c.id, name: c.name, max: c.max, isTambahan: !!c.isTambahan,
+      verified: cV, self: cS,
+      answered: cAnsV, selfAnswered: cAnsS, total: c.items.length,
+      prediksi: maxA > 0 ? (cV / maxA) * 100 : 0,
+      prediksiSelf: maxSelf > 0 ? (cS / maxSelf) * 100 : 0
+    };
+  });
+
+  const prediksi     = computePrediksi(twKey, it => state.scores[it.id]);
+  const prediksiSelf = computePrediksi(twKey, it => state.selfScores[it.id]);
+
+  const totalMax = tw.criteria.reduce((a,c)=>a+c.max, 0);
+  return {
+    verified: vTotal, self: sTotal,
+    prediksi, prediksiSelf,
+    answered: vAnswered, selfAnswered: sAnswered,
+    totalItems,
+    perCrit, max: totalMax,
+    progress:     totalItems > 0 ? (vAnswered / totalItems) * 100 : 0,
+    selfProgress: totalItems > 0 ? (sAnswered / totalItems) * 100 : 0
+  };
+}
+
+/* =====================================================================
+   RENDER — DASHBOARD
+   ===================================================================== */
+function renderDashboard(){
+  const twKeys = ["tw1","tw2","tw3","tw4"];
+
+  /* ---------- CAPAIAN PER TRIWULAN (angka besar + tombol detail) ---------- */
+  document.getElementById("twCards").innerHTML = twKeys.map(k => {
+    const r = calcTw(k);
+    const tw = DATA[k];
+    const clsV = r.prediksi>=80?'g':r.prediksi>=60?'a':'r';
+    const clsM = r.prediksiSelf>=80?'g':r.prediksiSelf>=60?'a':'r';
+    return `
+      <div class="card twcard">
+        <div class="twhead">
+          <div>
+            <h3>${tw.label}</h3>
+            <div class="twmeta">${r.answered}/${r.totalItems} subkriteria terverifikasi · maks ${fmt(r.max)} poin</div>
+          </div>
+        </div>
+        <div class="dual-scores">
+          <div class="sd">
+            <div class="sd-lbl"><i style="background:#1d4ed8"></i>Terverifikasi Final</div>
+            <div class="sd-v ${predikatColor(r.prediksi)}">${fmt(r.prediksi)}<small>%</small></div>
+            <div class="bar ${clsV}"><span style="width:${Math.min(r.prediksi,100)}%"></span></div>
+            <div class="sd-sub">${fmt(r.verified)} poin · ${r.answered}/${r.totalItems} dinilai</div>
+            <button class="sd-detail-btn v" onclick="openDetailModal('${k}','verified')" title="Lihat rincian skor terverifikasi">
+              🔍 Lihat detail →
+            </button>
+          </div>
+          <div class="sd">
+            <div class="sd-lbl"><i style="background:#b45309"></i>Pengisian Mandiri</div>
+            <div class="sd-v ${predikatColor(r.prediksiSelf)}">${fmt(r.prediksiSelf)}<small>%</small></div>
+            <div class="bar ${clsM}"><span style="width:${Math.min(r.prediksiSelf,100)}%"></span></div>
+            <div class="sd-sub">${fmt(r.self)} poin · ${r.selfAnswered}/${r.totalItems} dinilai</div>
+            <button class="sd-detail-btn m" onclick="openDetailModal('${k}','self')" title="Lihat rincian skor pengisian mandiri">
+              🔍 Lihat detail →
+            </button>
+          </div>
+        </div>
+        ${r.perCrit.map(c => `
+          <div class="crit-row">
+            <span class="nm">${esc(c.name)}</span>
+            <span class="vl"><b class="v">V ${fmt(c.verified)}</b> · <b class="m">M ${fmt(c.self)}</b> / ${fmt(c.max)}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+
+  /* ---------- PROGRES PENGISIAN CHECKLIST (angka diperbesar) ---------- */
+  document.getElementById("progressRecap").innerHTML = twKeys.map(k => {
+    const r = calcTw(k);
+    const clsV = r.progress>=80?'g':r.progress>=50?'a':'r';
+    const clsM = r.selfProgress>=80?'g':r.selfProgress>=50?'a':'r';
+    return `
+      <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px dashed #eef2f9">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+          <b style="font-size:15px;font-weight:800;color:var(--primary-dark)">${DATA[k].label}</b>
+          <span style="color:var(--muted);font-size:12.5px">${r.answered} / ${r.totalItems} item terverifikasi (${fmtPct(r.progress)}%)</span>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;font-size:12px;margin-bottom:6px">
+          <span style="flex:0 0 100px;color:#1d4ed8;font-weight:800">Terverifikasi</span>
+          <div class="bar ${clsV}" style="flex:1"><span style="width:${Math.min(r.progress,100)}%"></span></div>
+          <span style="flex:0 0 70px;text-align:right;font-weight:800;font-size:15px;color:#1d4ed8;font-variant-numeric:tabular-nums">${fmt(r.verified)}</span>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;font-size:12px">
+          <span style="flex:0 0 100px;color:#b45309;font-weight:800">Mandiri</span>
+          <div class="bar ${clsM}" style="flex:1"><span style="width:${Math.min(r.selfProgress,100)}%"></span></div>
+          <span style="flex:0 0 70px;text-align:right;font-weight:800;font-size:15px;color:#b45309;font-variant-numeric:tabular-nums">${fmt(r.self)}</span>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+/* =====================================================================
+   MODAL — DETAIL SKOR PER TRIWULAN
+   ===================================================================== */
+let lastFocusedEl = null;
+
+function openDetailModal(twKey, mode){
+  const tw = DATA[twKey];
+  if(!tw) return;
+  const r = calcTw(twKey);
+  const isV = mode === "verified";
+  const pct       = isV ? r.prediksi : r.prediksiSelf;
+  const total     = isV ? r.verified : r.self;
+  const answered  = isV ? r.answered : r.selfAnswered;
+  const scoresMap = isV ? state.scores : state.selfScores;
+
+  document.getElementById("modalTitle").textContent =
+    `${tw.label} — ${isV ? "Skor Terverifikasi" : "Skor Pengisian Mandiri"}`;
+  document.getElementById("modalSub").textContent = isV
+    ? "Rincian hasil final penilaian asesor (BAPPERIDA / BKPSDM / BPPKAD / Inspektorat) per subkriteria."
+    : "Rincian prediksi / pengisian mandiri oleh OPD per subkriteria.";
+
+  const summaryHtml = `
+    <div class="mss-grid">
+      <div class="mss-item ${isV ? "hl-v" : "hl-m"}">
+        <div class="mss-lbl">Total Skor</div>
+        <div class="mss-val">${fmt(total)}<small> / ${fmt(r.max)}</small></div>
+      </div>
+      <div class="mss-item ${isV ? "hl-v" : "hl-m"}">
+        <div class="mss-lbl">Persentase</div>
+        <div class="mss-val ${predikatColor(pct)}">${fmt(pct)}<small>%</small></div>
+      </div>
+      <div class="mss-item">
+        <div class="mss-lbl">Predikat</div>
+        <div class="mss-val" style="font-size:16px;padding-top:7px;letter-spacing:-.2px">${predikatLabel(pct)}</div>
+      </div>
+      <div class="mss-item">
+        <div class="mss-lbl">Terisi</div>
+        <div class="mss-val">${answered}<small> / ${r.totalItems} item</small></div>
+      </div>
+    </div>`;
+
+  const critHtml = tw.criteria.map(c => {
+    let cSum = 0;
+    const rows = c.items.map(it => {
+      const v = scoresMap[it.id];
+      const hasV = isFilled(v);
+      if(hasV) cSum += Number(v);
+      return `
+        <div class="modal-item-row">
+          <div class="mir-lbl">${esc(it.label)}</div>
+          <div class="mir-val ${hasV ? "" : "empty"}">
+            ${hasV ? `${fmt(v)} / ${fmt(it.max)}` : "belum dinilai"}
+          </div>
+        </div>`;
+    }).join("");
+    return `
+      <div class="modal-crit ${isV ? "" : "self-mode"}">
+        <div class="modal-crit-head">
+          <b>${esc(c.name)}</b>
+          <span class="mc-score">${fmt(cSum)} / ${fmt(c.max)} poin</span>
+        </div>
+        <div class="modal-item-list">${rows}</div>
+      </div>`;
+  }).join("");
+
+  document.getElementById("modalBody").innerHTML = summaryHtml + critHtml;
+  document.getElementById("modalBackdrop").classList.add("show");
+  document.body.style.overflow = "hidden";
+  lastFocusedEl = document.activeElement;
+  setTimeout(() => document.getElementById("modalCloseBtn").focus(), 40);
+}
+
+function closeModal(ev){
+  // jika diklik dari dalam modal (bukan backdrop), abaikan
+  if(ev && ev.target && ev.target !== ev.currentTarget) return;
+  const bd = document.getElementById("modalBackdrop");
+  if(!bd.classList.contains("show")) return;
+  bd.classList.remove("show");
+  document.body.style.overflow = "";
+  if(lastFocusedEl && lastFocusedEl.focus) lastFocusedEl.focus();
+}
+
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape") closeModal();
+});
+
+/* =====================================================================
+   RENDER — CHECKLIST
+   ===================================================================== */
+let collapsedCrit = {};
+
+function toggleCrit(key){
+  collapsedCrit[key] = !collapsedCrit[key];
+  renderChecklist();
+}
+
+function renderChecklist(){
+  const fTw = document.getElementById("fTw").value;
+  const fCrit = document.getElementById("fCrit").value;
+  const fStatus = document.getElementById("fStatus").value;
+  const q = document.getElementById("fSearch").value.trim().toLowerCase();
+
+  const twKeys = fTw === "all" ? ["tw1","tw2","tw3","tw4"] : [fTw];
+  let html = "";
+  let shownItems = 0;
+
+  twKeys.forEach(twKey => {
+    const tw = DATA[twKey];
+    const twHeaderShown = { v: false };
+
+    tw.criteria.forEach(crit => {
+      if(fCrit !== "all" && crit.id !== fCrit) return;
+
+      const filteredItems = crit.items.filter(it => {
+        const v = state.scores[it.id];
+        const s = state.selfScores[it.id];
+        const hasAny = isFilled(v) || isFilled(s);
+        if(fStatus === "filled" && !hasAny) return false;
+        if(fStatus === "empty" && hasAny) return false;
+        if(q){
+          const hay = (it.label + " " + crit.name + " " + (it.penilai||"")).toLowerCase();
+          if(!hay.includes(q)) return false;
+        }
+        return true;
+      });
+      if(filteredItems.length === 0) return;
+
+      if(!twHeaderShown.v){
+        twHeaderShown.v = true;
+        html += `
+          <div style="display:flex;align-items:center;gap:10px;margin:22px 0 10px">
+            <h2 style="font-size:17px;font-weight:800;color:var(--primary-dark)">📅 ${tw.label}</h2>
+            <span class="badge purple">Maks ${fmt(tw.criteria.reduce((a,c)=>a+c.max,0))} poin</span>
+          </div>`;
+      }
+
+      const key = twKey + "_" + crit.id;
+      const isCollapsed = collapsedCrit[key];
+
+      let cV = 0, cS = 0, cAnsV = 0, cAnsS = 0;
+      crit.items.forEach(it => {
+        if(isFilled(state.scores[it.id])){ cV += Number(state.scores[it.id]); cAnsV++; }
+        if(isFilled(state.selfScores[it.id])){ cS += Number(state.selfScores[it.id]); cAnsS++; }
+      });
+
+      html += `
+        <div class="card crit-block">
+          <div class="crit-head ${isCollapsed?'collapsed':''}" onclick="toggleCrit('${key}')">
+            <h3>
+              <span class="chev">▼</span>
+              ${esc(crit.name)}
+              <span class="badge blue-soft">V: ${fmt(cV)} / ${fmt(crit.max)}</span>
+              <span class="badge amber">M: ${fmt(cS)} / ${fmt(crit.max)}</span>
+            </h3>
+            <span style="font-size:12px;color:var(--muted)">Terisi V ${cAnsV} · M ${cAnsS} / ${crit.items.length}</span>
+          </div>
+          <div class="crit-body ${isCollapsed?'hidden':''}">
+            ${filteredItems.map(it => renderItem(it)).join("")}
+          </div>
+        </div>
+      `;
+      shownItems += filteredItems.length;
+    });
+  });
+
+  document.getElementById("checklistArea").innerHTML = shownItems > 0 ? html :
+    `<div class="card empty"><span class="ico">🔍</span>Tidak ada subkriteria yang cocok dengan filter/pencarian.</div>`;
+}
+
+function renderItem(it){
+  const v = state.scores[it.id];
+  const s = state.selfScores[it.id];
+  const hasV = isFilled(v);
+  const hasS = isFilled(s);
+
+  const buildInput = (mode, value, hasValue) => {
+    if(it.type === "number"){
+      return `
+        <input type="number" class="num" min="0" max="${it.max}" step="0.1"
+          value="${hasValue ? value : ""}"
+          placeholder="0 – ${fmt(it.max)}"
+          onchange="setScore('${it.id}', this.value, ${it.max}, '${mode}')"
+          oninput="setScore('${it.id}', this.value, ${it.max}, '${mode}')">`;
+    }
+    const opts = it.options.map(o =>
+      `<option value="${o.v}" ${hasValue && Number(value)===o.v ? "selected":""}>${fmt(o.v)} — ${esc(o.t)}</option>`
+    ).join("");
+    return `
+      <select class="${hasValue ? (mode==='self' ? 'filled self-filled' : 'filled') : ''}"
+        onchange="setScore('${it.id}', this.value, ${it.max}, '${mode}')">
+        <option value="">— Belum dinilai —</option>
+        ${opts}
+      </select>`;
+  };
+
+  return `
+    <div class="item">
+      <div>
+        <div class="name">${esc(it.label)}</div>
+        <div class="meta">
+          <span class="badge">Maks ${fmt(it.max)} poin</span>
+          ${it.penilai ? `<span class="badge gray">🏛️ ${esc(it.penilai)}</span>` : ""}
+        </div>
+      </div>
+      <div class="score-col verified">
+        <label>🔵 Skor Terverifikasi (Asesor)</label>
+        ${buildInput("verified", v, hasV)}
+        <div class="cur">${hasV ? `Tersimpan: <b class="v">${fmt(Number(v))}</b>` : "Belum ada nilai"}</div>
+      </div>
+      <div class="score-col self">
+        <label>🟠 Skor Pengisian Mandiri (Dinas)</label>
+        ${buildInput("self", s, hasS)}
+        <div class="cur">${hasS ? `Tersimpan: <b class="m">${fmt(Number(s))}</b>` : "Belum ada nilai"}</div>
+      </div>
+    </div>`;
+}
+
+function setScore(itemId, value, max, mode){
+  const target = (mode === "self") ? state.selfScores : state.scores;
+  if(value === "" || value === null || value === undefined){
+    delete target[itemId];
+  } else {
+    let num = Number(value);
+    if(isNaN(num)) num = 0;
+    if(num < 0) num = 0;
+    if(num > max) num = max;
+    target[itemId] = num;
+  }
+  save();
+  refreshAfterScoreChange();
+}
+
+let scoreRefreshTimer = null;
+function refreshAfterScoreChange(){
+  clearTimeout(scoreRefreshTimer);
+  scoreRefreshTimer = setTimeout(() => {
+    renderDashboard();
+    renderChecklist();
+  }, 220);
+}
+
+/* =====================================================================
+   RENDER — RENCANA AKSI
+   ===================================================================== */
+function saveAksi(){
+  const nama = document.getElementById("aNama").value.trim();
+  if(!nama){ alert("Nama kegiatan wajib diisi."); return; }
+  const id = document.getElementById("aId").value;
+  const payload = {
+    id: id || "a_" + Date.now() + "_" + Math.random().toString(36).slice(2,7),
+    nama,
+    pic: document.getElementById("aPic").value.trim(),
+    target: document.getElementById("aTarget").value,
+    tw: document.getElementById("aTw").value,
+    crit: document.getElementById("aCrit").value,
+    status: document.getElementById("aStatus").value,
+    bukti: document.getElementById("aBukti").value.trim(),
+    catatan: document.getElementById("aCatatan").value.trim()
+  };
+  if(id){
+    const idx = state.actions.findIndex(a => a.id === id);
+    if(idx >= 0) state.actions[idx] = payload;
+  } else {
+    state.actions.unshift(payload);
+  }
+  save();
+  clearAksiForm();
+  renderAksi();
+  toast(id ? "Rencana aksi diperbarui" : "Rencana aksi ditambahkan");
+}
+function clearAksiForm(){
+  ["aId","aNama","aPic","aTarget","aBukti","aCatatan"].forEach(i => document.getElementById(i).value = "");
+  document.getElementById("aTw").value = "TW I";
+  document.getElementById("aCrit").value = "Perencanaan";
+  document.getElementById("aStatus").value = "Belum";
+}
+function editAksi(id){
+  const a = state.actions.find(x => x.id === id);
+  if(!a) return;
+  document.getElementById("aId").value = a.id;
+  document.getElementById("aNama").value = a.nama;
+  document.getElementById("aPic").value = a.pic || "";
+  document.getElementById("aTarget").value = a.target || "";
+  document.getElementById("aTw").value = a.tw || "TW I";
+  document.getElementById("aCrit").value = a.crit || "Perencanaan";
+  document.getElementById("aStatus").value = a.status || "Belum";
+  document.getElementById("aBukti").value = a.bukti || "";
+  document.getElementById("aCatatan").value = a.catatan || "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function deleteAksi(id){
+  if(!confirm("Hapus rencana aksi ini?")) return;
+  state.actions = state.actions.filter(a => a.id !== id);
+  save();
+  renderAksi();
+  toast("Rencana aksi dihapus");
+}
+function renderAksi(){
+  const fStatus = document.getElementById("fAksiStatus").value;
+  const fTw = document.getElementById("fAksiTw").value;
+  const q = document.getElementById("fAksiSearch").value.trim().toLowerCase();
+
+  let list = state.actions.filter(a => {
+    if(fStatus !== "all" && a.status !== fStatus) return false;
+    if(fTw !== "all" && a.tw !== fTw) return false;
+    if(q){
+      const hay = ((a.nama||"") + " " + (a.pic||"") + " " + (a.catatan||"")).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById("aksiCount").textContent = list.length + " item";
+  const wrap = document.getElementById("aksiTableWrap");
+
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="empty"><span class="ico">🗂️</span>Belum ada rencana aksi. Tambahkan melalui formulir di atas.</div>`;
+    return;
+  }
+
+  const stClass = { "Belum":"st-belum", "Proses":"st-proses", "Selesai":"st-selesai", "Terlambat":"st-terlambat" };
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th style="min-width:220px">Kegiatan</th>
+          <th>PIC</th>
+          <th>Triwulan / Kriteria</th>
+          <th>Target</th>
+          <th>Status</th>
+          <th>Bukti Dukung</th>
+          <th>Catatan Pimpinan</th>
+          <th style="text-align:right">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(a => `
+          <tr>
+            <td><b>${esc(a.nama)}</b></td>
+            <td>${esc(a.pic || "-")}</td>
+            <td><span class="badge">${esc(a.tw||"-")}</span> <span class="badge gray">${esc(a.crit||"-")}</span></td>
+            <td>${a.target ? esc(a.target) : "-"}</td>
+            <td><span class="st ${stClass[a.status]||'st-belum'}">${esc(a.status||"Belum")}</span></td>
+            <td style="max-width:180px;word-break:break-word">${esc(a.bukti || "-")}</td>
+            <td style="max-width:220px;font-size:12.5px;color:var(--muted)">${esc(a.catatan || "-")}</td>
+            <td style="text-align:right;white-space:nowrap">
+              <button class="btn btn-ghost btn-sm" onclick="editAksi('${a.id}')">✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteAksi('${a.id}')">🗑️</button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+/* =====================================================================
+   NAVIGATION & INIT
+   ===================================================================== */
+function switchTab(view, btn){
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById("view-" + view).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderAll(){
+  renderDashboard();
+  renderChecklist();
+  renderAksi();
+}
+
+load();
+document.getElementById("opdName").value = state.opd || "";
+renderAll();
+window.addEventListener("beforeunload", save);
+</script>
+</body>
+</html>
